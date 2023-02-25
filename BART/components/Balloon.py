@@ -2,12 +2,12 @@ import pygame
 from pygame.sprite import Sprite
 
 
-class BalloonBART(Sprite):
+class Balloon(Sprite):
 
     def __init__(self, screen):
         Sprite.__init__(self)
         self.screen = screen
-        self.startimage = pygame.image.load('balloon_new.png')
+        self.startimage = pygame.image.load('img/balloon_new.png')
         self.startimage_w, self.startimage_h = self.startimage.get_size()
 
         self.image = pygame.transform.smoothscale(self.startimage, (100, 100))

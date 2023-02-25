@@ -7,7 +7,7 @@ class Boom(Sprite):
     def __init__(self, screen):
         Sprite.__init__(self)
         self.screen = screen
-        self.startimage = pygame.image.load('boom.png')
+        self.startimage = pygame.image.load('img/boom.png')
         self.startimage_w, self.startimage_h = self.startimage.get_size()
 
         self.image = pygame.transform.smoothscale(self.startimage, (250, 250))

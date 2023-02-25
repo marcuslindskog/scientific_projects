@@ -8,7 +8,7 @@ class Star(Sprite):
         Sprite.__init__(self)
         self.screen = screen
         self.settings = settings
-        self.startimage = pygame.image.load('star.png')
+        self.startimage = pygame.image.load('img/star.png')
         self.startimage_w, self.startimage_h = self.startimage.get_size()
 
         self.image = pygame.transform.smoothscale(self.startimage, (25, 25))

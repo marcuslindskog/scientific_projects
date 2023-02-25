@@ -23,10 +23,10 @@ class Scoreboard(Sprite):
         self.x_balloons_position, self.y_balloons_position = settings.screen_width/2-150, settings.screen_height-settings.scoreboard_height+15
         self.x_stars_position, self.y_stars_position  =  settings.screen_width/2+150, settings.screen_height-settings.scoreboard_height + 15
 
-        self.starimage = pygame.image.load('star.png')
+        self.starimage = pygame.image.load('img/star.png')
         self.starimage_w, self.starimage_h = self.starimage.get_size()
 
-        self.ballonimage = pygame.image.load('balloon_new.png')
+        self.ballonimage = pygame.image.load('img/balloon_new.png')
         self.ballonimage_w, self.ballonimage_h = self.ballonimage.get_size()
 
         self.image = pygame.transform.smoothscale(self.starimage, (50, 50))
