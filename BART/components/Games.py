@@ -8,31 +8,35 @@ from components.Star import Star
 
 class Games():
     
-    def __init__(self, screen, settings):
+    def __init__(self, screen, settings, is_demo, times_to_blow, datafile='data/demo.txt', participant='demo'):
         self.screen = screen
         self.settings = settings
+        self.boom = Boom(self.screen)
+        self.scoreboard = Scoreboard(self.screen, self.settings)
+        self.new_balloon_button = Button(self.screen, self.settings.screen_width / 2 - self.settings.button_width / 2,
+                                    self.settings.screen_height / 2 + 125 - self.settings.button_height / 2, self.settings, "New Balloon")
+        if is_demo:
+            self.end_button = Button(self.screen, self.settings.screen_width / 2 - self.settings.button_width / 2,
+                                self.settings.screen_height / 2 + 125 - self.settings.button_height / 2, self.settings, "Start Game")
+        else:    
+            self.end_button = Button(screen, settings.screen_width / 2 - settings.button_width / 2,
+                                    settings.screen_height / 2 + 125 - settings.button_height / 2, settings, "Game Finished")
+        self.is_demo = is_demo
+        self.times_to_blow = times_to_blow
+        self.datafile = datafile
+        self.participant = participant
     
-    def run_demo_game(self):
-        self.settings.nr_balloons = 4
-        # Create a list to hold our balloons, and include our first balloon in the list
-        balloons_demo = [Balloon(self.screen)]
-        boom = Boom(self.screen)
-        scoreboard_demo = Scoreboard(self.screen, self.settings)
+    def run_game(self):
+        balloons = [Balloon(self.screen)]
         playing_game = True
         new_balloon = False
         boom_ballon = False
         stars = []
-        new_balloon_button = Button(self.screen, self.settings.screen_width / 2 - self.settings.button_width / 2,
-                                    self.settings.screen_height / 2 + 125 - self.settings.button_height / 2, self.settings, "New Balloon")
-
-        end_button = Button(self.screen, self.settings.screen_width / 2 - self.settings.button_width / 2,
-                            self.settings.screen_height / 2 + 125 - self.settings.button_height / 2, self.settings, "Start Game")
-
-        time_to_blow = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        n = 0
+        ballon_number = 0
+        time_to_blow = list(map(int, self.times_to_blow[ballon_number]))
+        n=0
         while playing_game:
             mouse_x, mouse_y = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
-
             # Redraw the empty screen before redrawing any game objects
             self.screen.fill(self.settings.bg_color)
 
@@ -40,39 +44,49 @@ class Games():
                 if event.type == pygame.QUIT:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if balloons_demo[0].rect.collidepoint(mouse_x, mouse_y):
-                        n += 1
-                        stars.append(Star(self.screen, self.settings, n))
-                        for balloon in balloons_demo:
-                            balloon.update(self.settings.balloon_scale)
-                            if time_to_blow[n] == 1:
-                                balloons_demo.remove(balloon)
-                                scoreboard_demo.update_nrstars(0)
-                                new_balloon = True
-                                boom_ballon = True
-                    else:
-                        for star in stars:
-                            if star.rect.collidepoint(mouse_x, mouse_y):
-                                balloons_demo.remove(balloon)
-                                scoreboard_demo.update_nrstars(n)
-                                new_balloon = True
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if balloons[0].rect.collidepoint(mouse_x, mouse_y):
+                            n += 1
+                            stars.append(Star(self.screen, self.settings, n))
+                            for balloon in balloons:
+                                balloon.update(self.settings.balloon_scale)
+                                if time_to_blow[n] == 1:
+                                    balloons.remove(balloon)
+                                    self.scoreboard.update_nrstars(0)
+                                    new_balloon = True
+                                    boom_ballon = True
+                        else:
+                            for star in stars:
+                                if star.rect.collidepoint(mouse_x, mouse_y):
+                                    balloons.remove(balloon)
+                                    self.scoreboard.update_nrstars(n)
+                                    new_balloon = True
 
-            if new_balloon and scoreboard_demo.nr_balloons > 1:
-                balloons_demo = [Balloon(self.screen)]
+            if new_balloon and self.scoreboard.nr_balloons > 1:
+                # Save data to file
+                with open(self.datafile, 'a') as f:
+                    if boom_ballon:
+                        f.write(self.participant + self.settings.delim + str(1+ self.settings.nr_balloons - self.scoreboard.nr_balloons) +
+                                self.settings.delim + "1" + self.settings.delim + str(time_to_blow.index(1)) + self.settings.delim +
+                                str(n) + self.settings.delim  + str(0) + self.settings.delim + str(self.scoreboard.nr_stars)
+                                + '\n')
+                    else:
+                        f.write(self.participant + self.settings.delim + str(1+ self.settings.nr_balloons - self.scoreboard.nr_balloons) +
+                                self.settings.delim + "0" + self.settings.delim + str(time_to_blow.index(1)) + self.settings.delim +
+                                str(n) + self.settings.delim  + str(n) + self.settings.delim + str(self.scoreboard.nr_stars)
+                                + '\n')
+
+                balloons = [Balloon(self.screen)]
                 new_balloon = False
                 n = 0
                 waiting = True
                 if boom_ballon:
-                    boom.blitme()
+                    self.boom.blitme()
                     boom_ballon = False
-                scoreboard_demo.blitme()
-                new_balloon_button.blitme()
-                if scoreboard_demo.nr_balloons == 3:
-                    time_to_blow = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-                elif scoreboard_demo.nr_balloons == 4:
-                    time_to_blow = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-                elif scoreboard_demo.nr_balloons == 2:
-                    time_to_blow = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                self.scoreboard.blitme()
+                self.new_balloon_button.blitme()
+                ballon_number += 1
+                time_to_blow = list(map(int, self.times_to_blow[ballon_number]))
                 for star in stars:
                     star.blitme()
                 pygame.display.flip()
@@ -83,19 +97,27 @@ class Games():
                         if event.type == pygame.QUIT:
                             sys.exit()
                         if event.type == pygame.MOUSEBUTTONDOWN:
-                            if new_balloon_button.rect.collidepoint(mouse_x, mouse_y):
+                            if self.new_balloon_button.rect.collidepoint(mouse_x, mouse_y):
                                 waiting = False
-                                scoreboard_demo.update_nrballons()
+                                self.scoreboard.update_nrballons()
 
-            elif new_balloon and scoreboard_demo.nr_balloons == 1:
+            elif new_balloon and self.scoreboard.nr_balloons == 1:
+                # Save data to file
+                with open(self.datafile, 'a') as f:
+                    if boom_ballon:
+                        f.write(self.participant + self.settings.delim + str(1 + self.settings.nr_balloons - self.scoreboard.nr_balloons) +
+                                self.settings.delim + "1" + self.settings.delim + str(time_to_blow.index(1)) + self.settings.delim +
+                                str(n) + self.settings.delim + str(0) + self.settings.delim + str(self.scoreboard.nr_stars)
+                                + '\n')
+                    else:
+                        f.write(self.participant + self.settings.delim + str(1 + self.settings.nr_balloons - self.scoreboard.nr_balloons) +
+                                self.settings.delim + "0" + self.settings.delim + str(time_to_blow.index(1)) + self.settings.delim +
+                                str(n) + self.settings.delim + str(n) + self.settings.delim + str(self.scoreboard.nr_stars)
+                                + '\n')
                 waiting = True
-                scoreboard_demo.update_nrballons()
-                end_button.blitme()
-                if boom_ballon:
-                    boom.blitme()
-                scoreboard_demo.blitme()
-                for star in stars:
-                    star.blitme()
+                self.scoreboard.update_nrballons()
+                self.end_button.blitme()
+                self.scoreboard.blitme()
                 pygame.display.flip()
                 while waiting:
                     mouse_x, mouse_y = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
@@ -103,14 +125,15 @@ class Games():
                         if event.type == pygame.QUIT:
                             sys.exit()
                         if event.type == pygame.MOUSEBUTTONDOWN:
-                            if end_button.rect.collidepoint(mouse_x, mouse_y):
+                            if self.end_button.rect.collidepoint(mouse_x, mouse_y):
+                                waiting = False
                                 return
 
-            # redraw the screen, every pass through the event loop
+            #redraw the screen, every pass through the event loop
             self.screen.fill(self.settings.bg_color)
-            for balloon in balloons_demo:
+            for balloon in balloons:
                 balloon.blitme()
-            scoreboard_demo.blitme()
+            self.scoreboard.blitme()
             for star in stars:
                 star.blitme()
             pygame.display.flip()
