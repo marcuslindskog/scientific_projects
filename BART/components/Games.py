@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, csv
 from pygame.sprite import Sprite
 from components.Balloon import Balloon
 from components.Scoreboard import Scoreboard
@@ -8,7 +8,7 @@ from components.Star import Star
 
 class Games():
     
-    def __init__(self, screen, settings, is_demo, times_to_blow, datafile='data/demo.txt', participant='demo'):
+    def __init__(self, screen, settings, is_demo, datafile='data/demo.txt', participant='demo'):
         self.screen = screen
         self.settings = settings
         self.boom = Boom(self.screen)
@@ -18,15 +18,37 @@ class Games():
         if is_demo:
             self.end_button = Button(self.screen, self.settings.screen_width / 2 - self.settings.button_width / 2,
                                 self.settings.screen_height / 2 + 125 - self.settings.button_height / 2, self.settings, "Start Game")
+            
+            with open('input/demo_input.csv', 'r') as f:
+                reader = csv.reader(f)
+                self.times_to_blow = list(reader) 
         else:    
             self.end_button = Button(screen, settings.screen_width / 2 - settings.button_width / 2,
                                     settings.screen_height / 2 + 125 - settings.button_height / 2, settings, "Game Finished")
+            with open('input/main_game_input.csv', 'r') as f:
+                reader = csv.reader(f)
+                self.times_to_blow = list(reader)
+
+        self.demo_button = Button(self.screen, self.settings.screen_width / 2 - self.settings.button_width / 2,
+                        self.settings.screen_height / 2 + 125 - self.settings.button_height / 2, settings, "Start Demo")
         self.is_demo = is_demo
-        self.times_to_blow = times_to_blow
         self.datafile = datafile
         self.participant = participant
     
     def run_game(self):
+        if self.is_demo:
+            self.demo_button.blitme()
+            pygame.display.flip()
+            waiting = True
+            while waiting:
+                mouse_x, mouse_y = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        sys.exit()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if self.demo_button.rect.collidepoint(mouse_x, mouse_y):
+                            waiting = False
+
         balloons = [Balloon(self.screen)]
         playing_game = True
         new_balloon = False
