@@ -1,27 +1,21 @@
-import pygame, pygame.font, pygame.event, pygame.draw, random
-from pygame.sprite import Sprite
-from pygame.locals import *
+import pygame
+from components.Inputs import Inputs
 
 class Messages():
 
     def __init__(self, screen) -> None:
         self.screen = screen
+        self.inputs = Inputs()
 
     def ask(self, question):
         pygame.font.init()
         current_string = []
         self.display_box(question + ": " + "".join(current_string))
         while 1:
-            inkey = self.get_key()
-            if inkey == K_BACKSPACE:
-                current_string = current_string[0:-1]
-            elif inkey == K_RETURN:
+            current_string, time_to_break = self.inputs.get_text(current_string)
+            if time_to_break:
                 break
-            elif inkey == K_MINUS:
-                current_string.append("_")    
-            elif inkey <= 127:
-                current_string.append(chr(inkey))
-                self.display_box(question + ": " + "".join(current_string))
+            self.display_box(question + ": " + "".join(current_string))
         return "".join(current_string)
     
     def display_box(self, message=""):
@@ -38,11 +32,3 @@ class Messages():
             self.screen.blit(fontobject.render(message, 1, (255,255,255)),
                         ((self.screen.get_width() / 2) - 100, (self.screen.get_height() / 2) - 10))
         pygame.display.flip()
-    
-    def get_key(self):
-        while 1:
-            event = pygame.event.poll()
-            if event.type == KEYDOWN:
-                return event.key
-            else:
-                pass

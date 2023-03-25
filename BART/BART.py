@@ -1,12 +1,6 @@
 import pygame
 
 from settings.Settings import Settings
-
-from components.Balloon import Balloon
-from components.Scoreboard import Scoreboard
-from components.Button import Button
-from components.Boom import Boom
-from components.Star import Star
 from components.Higscore import Highscore
 from components.Messages import Messages
 from components.Participant import Participant

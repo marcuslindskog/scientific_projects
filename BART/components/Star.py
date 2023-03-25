@@ -1,11 +1,8 @@
-import pygame
-from pygame.sprite import Sprite
+import pygame, sys
 
+class Star():
 
-class Star(Sprite):
-
-    def __init__(self, screen, settings,starn):
-        Sprite.__init__(self)
+    def __init__(self, screen, settings, starn):
         self.screen = screen
         self.settings = settings
         self.startimage = pygame.image.load('img/star.png')
@@ -13,6 +10,7 @@ class Star(Sprite):
 
         self.image = pygame.transform.smoothscale(self.startimage, (25, 25))
         self.image_w, self.image_h = self.image.get_size()
+        
         if starn < 11:
             self.x_position = self.screen.get_width()-30
             self.y_position = self.screen.get_height() - settings.scoreboard_height - 25 * starn
@@ -36,3 +34,8 @@ class Star(Sprite):
     def update_rect(self):
         self.rect = pygame.Rect(self.x_position, self.y_position,
                                 self.image_w, self.image_h)
+
+    def check_push(self, mouse_x, mouse_y):
+        if self.rect.collidepoint(mouse_x, mouse_y):
+            return True
+        else: return False
