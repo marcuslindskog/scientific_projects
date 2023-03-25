@@ -1,11 +1,8 @@
-import pygame
-from pygame.sprite import Sprite
+import pygame, sys
 
-
-class Balloon(Sprite):
+class Balloon():
 
     def __init__(self, screen):
-        Sprite.__init__(self)
         self.screen = screen
         self.startimage = pygame.image.load('img/balloon_new.png')
         self.startimage_w, self.startimage_h = self.startimage.get_size()
@@ -33,3 +30,8 @@ class Balloon(Sprite):
     def update_rect(self):
         self.rect = pygame.Rect(self.x_position, self.y_position,
                                 self.image_w, self.image_h)
+    
+    def check_push(self, mouse_x, mouse_y):
+        if self.rect.collidepoint(mouse_x, mouse_y):
+            return True
+        else: return False
